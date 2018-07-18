@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
+    <!-- 打开配置的注解 -->
+    <tx:annotation-driven/>
+    <!-- 打开注解 -->
+    <context:annotation-config/>
+    <!-- 扫描注解 -->
+    <context:component-scan base-package="com"/>
+    <!-- 打开自动代理 -->
+    <aop:aspectj-autoproxy/>
+    
+    <context:property-placeholder location="classpath:application.properties" />
+    
+    <bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxActive" value="10" />
+      	<property name="maxIdle" value="60000" />
+      	<property name="maxWait" value="60000" />
+      	<property name="testOnBorrow" value="true" />
+      	<property name="validationQuery" value="${jdbc.validationQuery}" />
+    </bean>
+    
+    <!-- 配置sqlsessionfactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+ 		<!-- 数据源 -->
+ 		<property name="dataSource" ref="myDataSource" />
+ 		<!-- 加载mybatis的主配置文件 -->
+ 		<property name="configLocation" value="classpath:config/spring-mybatis.xml" />
+ 		<property name="mapperLocations" value="classpath:mapper/*.xml" />
+	</bean>
+	<!-- dao层接口xml映射相关配置,需导入mapper包 -->
+	<bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.caodaxing.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+		<property name="properties" value="tk.mybatis.mapper.common.Mapper,tk.mybatis.mapper.common.IdsMapper,tk.mybatis.mapper.common.MySqlMapper" />
+	</bean>  
+	
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="myDataSource" />
+	</bean>
+	<!-- 需要添加事务的方法 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED"/>
+			<tx:method name="append*" propagation="REQUIRED" />
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="modify*" propagation="REQUIRED" />
+			<tx:method name="edit*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="remove*" propagation="REQUIRED" />
+			<tx:method name="repair" propagation="REQUIRED" />
+			<tx:method name="delAndRepair" propagation="REQUIRED" />
+			<tx:method name="set*" propagation="REQUIRED" />
+			<tx:method name="get*" propagation="SUPPORTS" />
+			<tx:method name="find*" propagation="SUPPORTS" />
+			<tx:method name="load*" propagation="SUPPORTS" />
+			<tx:method name="search*" propagation="SUPPORTS" />
+			<tx:method name="datagrid*" propagation="SUPPORTS" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config proxy-target-class="true">
+		<aop:advisor pointcut="execution(* com..service..*Service.*(..)) or execution(* *..service..*Impl.*(..))" 
+		advice-ref="txAdvice" />
+	</aop:config>
+	
+	<!-- <aop:config>
+		<aop:pointcut id="pointcut" 
+			expression="execution(* com..service..*Service.*(..)) or execution(* *..service..*Impl.*(..))"/>
+		<aop:advisor pointcut-ref="pointcut" advice-ref="txAdvice"/>
+	</aop:config> -->
+	
+	<import resource="spring-shiro.xml"/>
+	
+</beans>

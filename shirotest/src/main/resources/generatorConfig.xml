@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+	<!-- jar包位置 -->
+	<classPathEntry
+		location="D://MyDownloads/mysql-connector-java-5.1.8.jar" />
+		
+	
+
+	<context id="context1">
+		<!-- 指定生成的java文件的编码,没有直接生成到项目时中文可能会乱码 -->
+        <property name="javaFileEncoding" value="UTF-8"/>
+		<commentGenerator type="com.caodaxing.utils.MyCommentGenerator">
+			<!-- 是否去除自动生成的注释 true：是 ： false:否 -->
+			<property name="suppressAllComments" value="false" />
+			<property name="USER_DEFINED_FLAG" value="true"/>
+		</commentGenerator>
+
+		<!-- 连接数据库 -->
+		<jdbcConnection 
+		    connectionURL="jdbc:mysql://172.16.0.26:3306/test"
+			driverClass="com.mysql.jdbc.Driver" 
+			password="Hro@1%4"
+			userId="hro" />
+
+		<!-- 生成pojo类的位置 -->
+		<javaModelGenerator targetPackage="com.caodaxing.entity"
+			targetProject="shirotest\src\main\java">
+		</javaModelGenerator>
+
+		<!-- 生成映射文件的位置 -->
+		<sqlMapGenerator targetPackage="mapper"
+			targetProject="shirotest\src\main\resources">
+		</sqlMapGenerator>
+
+		<!-- 接口生成位置 -->
+		<javaClientGenerator targetPackage="com.caodaxing.dao"
+			targetProject="shirotest\src\main\java" type="XMLMAPPER" />
+
+		<!-- 数据库中的表 -->
+		<!-- <table tableName="login_user"/> -->
+		<table tableName="db_role" >
+			<domainObjectRenamingRule searchString="^Db" replaceString=""/>
+		</table>
+		<!-- <table tableName="db_auth_role" >
+			<domainObjectRenamingRule searchString="^Db" replaceString=""/>
+		</table>
+		<table tableName="db_user_role" >
+			<domainObjectRenamingRule searchString="^Db" replaceString=""/>
+		</table> -->
+	</context>
+</generatorConfiguration>
